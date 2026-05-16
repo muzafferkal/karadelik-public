@@ -1,0 +1,46 @@
+# Build outputs
+build/
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.lst
+*.map
+
+# Simulation
+*.vcd
+*.fst
+*.ghw
+*.wdb
+sim_build/
+__pycache__/
+*.pyc
+results.xml
+
+# Auto-generated filelist (cocotb runner produces an absolutized copy
+# of karadelik_sim.f for verilator's sim_build CWD).
+src/rtl/karadelik_sim.abs.f
+
+# FPGA
+*.bit
+*.ltx
+*.xpr
+*.jou
+*.log
+.Xil/
+vivado_*/
+
+# Toolchain build
+toolchain_install/
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
