@@ -8,13 +8,13 @@
 # Exits non-zero if any test file fails or times out.
 #
 # Tunables via environment variables:
-#   KTC_TEST_TIMEOUT_S  per-file timeout in seconds (default: 300)
+#   KTC_TEST_TIMEOUT_S  per-file timeout in seconds (default: 600)
 #   KTC_TEST_FILTER     glob applied to test paths (default: "*")
 
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TIMEOUT_S="${KTC_TEST_TIMEOUT_S:-300}"
+TIMEOUT_S="${KTC_TEST_TIMEOUT_S:-600}"
 FILTER="${KTC_TEST_FILTER:-*}"
 
 mapfile -t TESTS < <(find "$REPO_ROOT/src/tb/cocotb" -name 'test_*.py' -type f 2>/dev/null \

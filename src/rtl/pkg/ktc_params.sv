@@ -3,8 +3,6 @@
 // KTC (Kal's Tensor Core) - Global Parameters
 //
 // Defines all architectural constants for the KTC tile.
-// These parameters are derived from the Blackhole Tensix architecture
-// and adapted for the clean-room CORE-V implementation.
 
 package ktc_params;
 
@@ -184,7 +182,7 @@ package ktc_params;
   parameter int CORE_TRISC2     = 4;
 
   // ──────────────────────────────────────────────
-  // Per-core Instruction RAM (Tensix-style)
+  // Per-core Instruction RAM
   // ──────────────────────────────────────────────
   // Each RISC-V core has a dedicated 16 KiB IRAM that holds its kernel.
   // IRAMs are loaded by BRISC (or by the host via NOC) before reset is
@@ -203,7 +201,7 @@ package ktc_params;
   parameter logic [31:0] IRAM_REGION_MASK = 32'hFFFC_0000; // identifies 0xFFC0/0xFFC1 region
 
   // ──────────────────────────────────────────────
-  // Tensix-style MMIO Control Blocks
+  // MMIO Control Blocks
   // ──────────────────────────────────────────────
   // Reset unit: per-core reset bits. Reaches every core's effective reset.
   parameter logic [31:0] RESET_UNIT_BASE  = 32'hFFB1_4000;

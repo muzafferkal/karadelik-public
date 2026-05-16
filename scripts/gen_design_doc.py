@@ -1395,9 +1395,11 @@ html, body { margin: 0; padding: 0; height: 100%; font-family: ui-sans-serif, sy
     }
     const token = ++_renderToken;
     if (currentTab === "block") {
+      // Synchronous: every autoSvg envelope was predecoded at boot, so
+      // the block diagram paints in this tick and attachBlockHandlers()
+      // always runs (instance boxes stay clickable).
       const env = m.autoSvg;
-      const svg = await decodeSvgEnvelope(env);
-      if (token !== _renderToken) return;
+      const svg = env ? (_svgCache.get(env) || "") : "";
       $view.innerHTML = renderHeaders(env) + (svg || "<p class='unavailable'>no diagram</p>");
       attachBlockHandlers();
     } else if (currentTab === "yosys") {
@@ -1614,9 +1616,19 @@ html, body { margin: 0; padding: 0; height: 100%; font-family: ui-sans-serif, sy
   }
 
   // ── Boot ─────────────────────────────────────────────────────
-  buildTree();
-  const initial = location.hash.replace("#", "") || roots[0];
-  navigateTo(initial, true);
+  // Predecode every block-diagram envelope into _svgCache up front, so
+  // the block tab renders synchronously (see renderView) and the very
+  // first paint cannot race on an async gzip decode.
+  async function boot() {
+    $view.innerHTML = "<p class='unavailable'>Loading design…</p>";
+    for (const m of Object.values(modules)) {
+      if (m.autoSvg) await decodeSvgEnvelope(m.autoSvg);
+    }
+    buildTree();
+    const initial = location.hash.replace("#", "") || roots[0];
+    navigateTo(initial, true);
+  }
+  boot();
 })();
 </script>
 </body>

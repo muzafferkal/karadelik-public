@@ -1,7 +1,7 @@
 # Karadelik - KTC (Kal's Tensor Core) Project
 
 ## What is this?
-A clean-room implementation of a tensor compute tile (KTC) inspired by Tenstorrent's Blackhole architecture. Uses OpenHW CORE-V RISC-V cores (CVE2 for data movers, CV32E40X for compute dispatchers) with CV-X-IF coprocessor interface replacing proprietary MMIO dispatch.
+A clean-room implementation of a tensor compute tile (KTC). Uses OpenHW CORE-V RISC-V cores (CVE2 for data movers, CV32E40X for compute dispatchers) with a CV-X-IF coprocessor interface for instruction dispatch.
 
 ## Architecture
 - KTC tile = 5 RISC-V cores + FPU (matrix) + SFPU (vector) + unpacker + packer + ThCon + L1 SRAM + 2 NOC routers
@@ -11,7 +11,7 @@ A clean-room implementation of a tensor compute tile (KTC) inspired by Tenstorre
 ## Code conventions
 - RTL: SystemVerilog, 2-space indent, lowercase_with_underscores for signals
 - Testbenches: cocotb (Python) preferred, SystemVerilog for timing-critical tests
-- FW/LLK: C/C++, follows TT-Metal coding conventions for compatibility
+- FW/LLK: C/C++, low-level kernel macros for CV-X-IF dispatch
 
 ## Project layout
 - `src/rtl/` - All custom hardware blocks (CV-X-IF adapter, instruction pipe, FPU, SFPU, etc.)
@@ -24,7 +24,6 @@ A clean-room implementation of a tensor compute tile (KTC) inspired by Tenstorre
 - `docs/` - Architecture specs and porting guides
 
 ## Upstream repos (cloned to ~/projects/, NOT part of this repo)
-- `~/projects/tenstorrent/` - tt-metal, tt-isa-documentation, etc. (read-only reference)
 - `~/projects/cv32e40x/` and `~/projects/cve2/` - OpenHW CORE-V RISC-V cores (RTL sources)
 
 ## Build

@@ -1,9 +1,0 @@
-# Upstream commit SHAs - 2026-05-10
-tenstorrent/tt-metal 3f39ff3267cd48366885084aa9027f3cf556b2d4
-tenstorrent/tt-isa-documentation 13ac5f6546efd65074baf5de4b9008a63cc111f7
-tenstorrent/tt-llk 36b092e8e195f706a081e1be92e2fd75e98e50b4
-openhwgroup/cv32e40x d952cd63bc1b4eb58cd893c28ef8283c781e345e
-openhwgroup/cve2 e35390a7754f4e9acbce22840835a7a0f045ddc7
-openhwgroup/core-v-xif d26eeab305270dd6462126b775cdbe28fb989477
-openhwgroup/core-v-verif 298a5f6d066fe15cceb761cdf434b8487561faae
-openhwgroup/cva6 f0c274cad66b84cd58379880741680351c7ce9ab
