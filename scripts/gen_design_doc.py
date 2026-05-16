@@ -994,11 +994,11 @@ def emit_html(modules: list[Module], roots: list[Module],
 _SVG_GZIP_THRESHOLD = 4 * 1024  # below this, store the SVG uncompressed
 
 
-def _wrap_svg(svg: str) -> Optional[dict]:
+def _wrap_svg(svg: str, allow_gzip: bool = True) -> Optional[dict]:
     if not svg:
         return None
     raw_len = len(svg.encode("utf-8"))
-    if raw_len < _SVG_GZIP_THRESHOLD:
+    if not allow_gzip or raw_len < _SVG_GZIP_THRESHOLD:
         return {
             "Content-Type":     "image/svg+xml",
             "Content-Encoding": "identity",
@@ -1064,7 +1064,10 @@ def _build_data_json(modules, roots, by_name) -> str:
             "ports":        [dataclasses.asdict(p) for p in m.ports],
             "instances":    [dataclasses.asdict(i) for i in m.instances],
             "parents":      sorted(m.parents),
-            "autoSvg":      _wrap_svg(auto_svg),
+            # Block diagrams ship uncompressed so the block tab renders
+            # synchronously (no DecompressionStream, no async race on the
+            # first paint). Only the large yosys schematics are gzipped.
+            "autoSvg":      _wrap_svg(auto_svg, allow_gzip=False),
             "yosysSvg":     _wrap_svg(yosys_svg),
             "yosysError":   m.yosys_error,
             "source":       source,
@@ -1395,11 +1398,11 @@ html, body { margin: 0; padding: 0; height: 100%; font-family: ui-sans-serif, sy
     }
     const token = ++_renderToken;
     if (currentTab === "block") {
-      // Synchronous: every autoSvg envelope was predecoded at boot, so
-      // the block diagram paints in this tick and attachBlockHandlers()
-      // always runs (instance boxes stay clickable).
+      // autoSvg is always shipped uncompressed (identity), so the block
+      // diagram renders synchronously here -- no async decode, no race,
+      // and attachBlockHandlers() always runs (instance boxes clickable).
       const env = m.autoSvg;
-      const svg = env ? (_svgCache.get(env) || "") : "";
+      const svg = env ? (env.body || "") : "";
       $view.innerHTML = renderHeaders(env) + (svg || "<p class='unavailable'>no diagram</p>");
       attachBlockHandlers();
     } else if (currentTab === "yosys") {
@@ -1460,11 +1463,15 @@ html, body { margin: 0; padding: 0; height: 100%; font-family: ui-sans-serif, sy
       breadcrumb.push(name);
     }
     currentModule = name;
-    history.replaceState(null, "", "#" + name);
+    // history.replaceState can throw under file:// in some browsers;
+    // a failed URL update must never abort navigation/rendering.
+    try { history.replaceState(null, "", "#" + name); } catch (e) {}
     renderCrumb();
     highlightTree(name);
     updateTabAvailability();
     renderView();
+    // Keep the details drawer in sync when it is open.
+    if ($drawer.classList.contains("open")) openDrawer(name);
     hideCtx();
     hideTooltip();
   }
@@ -1616,17 +1623,14 @@ html, body { margin: 0; padding: 0; height: 100%; font-family: ui-sans-serif, sy
   }
 
   // ── Boot ─────────────────────────────────────────────────────
-  // Predecode every block-diagram envelope into _svgCache up front, so
-  // the block tab renders synchronously (see renderView) and the very
-  // first paint cannot race on an async gzip decode.
-  async function boot() {
-    $view.innerHTML = "<p class='unavailable'>Loading design…</p>";
-    for (const m of Object.values(modules)) {
-      if (m.autoSvg) await decodeSvgEnvelope(m.autoSvg);
-    }
+  // Block diagrams are uncompressed (see renderView), so boot is fully
+  // synchronous -- no predecode, no async first paint.
+  function boot() {
     buildTree();
     const initial = location.hash.replace("#", "") || roots[0];
     navigateTo(initial, true);
+    // Details pane is open by default.
+    if (currentModule) openDrawer(currentModule);
   }
   boot();
 })();
